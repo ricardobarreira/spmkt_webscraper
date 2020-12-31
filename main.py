@@ -7,7 +7,7 @@ db_session = create_session()
 grocery_stores = ['rewe', 'kaufland']
 
 for store in grocery_stores:
-    # Get information needed to scrape store's offers
+    # Get information needed to scrape store's website
     headers = get_headers(db_session, store)
     urls = get_urls(db_session, store)
     html_elements = get_store_html_elements(db_session, store)
