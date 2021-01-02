@@ -6,7 +6,7 @@ from tables_objects import Store, Headers, Cookies, Urls, Html, Products, Offers
 
 # Config setting
 def create_session():
-    engine = create_engine(f'mysql+pymysql://{os.getenv("MYSQL_USER")}:{os.getenv("MYSQL_PW")}@localhost/testing_db')
+    engine = create_engine(f'mysql+pymysql://{os.getenv("MYSQL_USER")}:{os.getenv("MYSQL_PW")}@localhost/SuperMarket_data')
     Session = sessionmaker(bind=engine)
     session = Session()
     return session
