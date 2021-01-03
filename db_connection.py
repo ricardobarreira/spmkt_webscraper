@@ -5,8 +5,11 @@ from tables_objects import Store, Headers, Cookies, Urls, Html, Products, Offers
 
 
 # Config setting
-def create_session():
-    engine = create_engine(f'mysql+pymysql://{os.getenv("MYSQL_USER")}:{os.getenv("MYSQL_PW")}@localhost/SuperMarket_data')
+def create_session(remote=False):
+    if remote:
+        engine = create_engine(os.getenv("DATABASE_URL"))
+    else:
+        engine = create_engine(f'mysql+pymysql://{os.getenv("MYSQL_USER")}:{os.getenv("MYSQL_PW")}@localhost/SuperMarket_data')
     Session = sessionmaker(bind=engine)
     session = Session()
     return session
@@ -48,7 +51,7 @@ def get_registered_products(session):
 
 
 def update_products(session, offers_list):
-
+    #TODO add flag to differentiate calls to update local and remote databases in order to prevent unnecessary processing
     new_products = 0
     registered_products = get_registered_products(session)
     for offer in offers_list:
@@ -73,6 +76,7 @@ def update_offers(session, store_id, offers_list):
     for offer in offers_list:
         if offer['price'] == "":
             continue
+        # Get product_id from Products table to register Foreign Key
         product_id = session.query(Products.product_id).filter(Products.product_name == offer['title']).first()
         offer = Offers(
             offer_discount=offer['discount'],
@@ -86,6 +90,20 @@ def update_offers(session, store_id, offers_list):
     session.commit()
     print(50*'--',f"\n{new_offers} new offers successfully committed\n", 50*'--')
 
+def clear_tables(session):
+    """
+    Clear all data from the products and offers tables so that the info available for the webapp contains only
+    current offers and their respective products
+    """
+    products = session.query(Products).all()
+    offers = session.query(Offers).all()
+
+    for product, offer in zip(products, offers):
+        session.delete(product)
+        session.delete(offer)
+
+    session.commit()
+
 
 def update_local_database(store, offers_list, session):
 
@@ -96,3 +114,19 @@ def update_local_database(store, offers_list, session):
     else:
         store_id = 2
     update_offers(session, store_id, offers_list)
+
+
+def update_remote_database(store, offers_list, session):
+    clear_tables(session)
+
+    update_products(session, offers_list)
+
+    if store == 'rewe':
+        store_id = 1
+    else:
+        store_id = 2
+    update_offers(session, store_id, offers_list)
+
+
+if __name__ == '__main__':
+    print(os.getenv("DATABASE_URL"))
