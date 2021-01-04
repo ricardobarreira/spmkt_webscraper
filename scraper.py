@@ -24,7 +24,11 @@ def scrape_info(source, html_elements):
 
     for div in high_level_divs:
         # Crawl into the HTML structure until reach items of interest level
-        data = data[0].find(f'.{div.element_string}')
+        try:
+            data = data[0].find(f'.{div.element_string}')
+        # TODO define which exception to catch
+        except:
+            print("Could not access high level divs")
 
     # Initialize list that will hold dicts containing the offers
     offers_list = []
