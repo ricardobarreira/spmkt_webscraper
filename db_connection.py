@@ -116,8 +116,9 @@ def update_local_database(store, offers_list, session):
     update_offers(session, store_id, offers_list)
 
 
-def update_remote_database(store, offers_list, session):
-    clear_tables(session)
+def update_remote_database(store, offers_list, session, iter_number):
+    if iter_number == 0:
+        clear_tables(session)
 
     update_products(session, offers_list)
 
