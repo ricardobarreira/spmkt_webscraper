@@ -32,7 +32,7 @@ def scrape_and_update():
 
 
 if __name__ == '__main__':
-    schedule.every().day.at('7:00').do(scrape_and_update)
+    schedule.every().day.at('07:00').do(scrape_and_update)
     while (True):
         schedule.run_pending()
         time.sleep(1)
