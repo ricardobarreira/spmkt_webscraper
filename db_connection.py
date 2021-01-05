@@ -9,7 +9,8 @@ def create_session(remote=False):
     if remote:
         engine = create_engine(os.getenv("DATABASE_URL"))
     else:
-        engine = create_engine(f'mysql+pymysql://{os.getenv("MYSQL_USER")}:{os.getenv("MYSQL_PW")}@localhost/SuperMarket_data')
+        engine = create_engine(
+            f'mysql+pymysql://{os.getenv("MYSQL_USER")}:{os.getenv("MYSQL_PW")}@localhost/SuperMarket_data')
     Session = sessionmaker(bind=engine)
     session = Session()
     return session
@@ -51,14 +52,14 @@ def get_registered_products(session):
 
 
 def update_products(session, offers_list):
-    #TODO add flag to differentiate calls to update local and remote databases in order to prevent unnecessary processing
+    # TODO add flag to differentiate calls to update local and remote databases in order to prevent unnecessary processing
     new_products = 0
     registered_products = get_registered_products(session)
     for offer in offers_list:
         if offer['title'] == "":
             continue
-        if ((offer['title'], offer['quantity']) not in registered_products):
-            new_products+=1
+        if (offer['title'], offer['quantity']) not in registered_products:
+            new_products += 1
 
             product = Products(
                 product_name=offer['title'],
@@ -67,11 +68,10 @@ def update_products(session, offers_list):
             session.add(product)
 
     session.commit()
-    print(50*'--',f"\n{new_products} new product(s) successfully committed\n", 50*'--')
+    print(50 * '--', f"\n{new_products} new product(s) successfully committed\n", 50 * '--')
 
 
 def update_offers(session, store_id, offers_list):
-
     new_offers = 0
     for offer in offers_list:
         if offer['price'] == "":
@@ -88,7 +88,8 @@ def update_offers(session, store_id, offers_list):
         new_offers += 1
 
     session.commit()
-    print(50*'--',f"\n{new_offers} new offers successfully committed\n", 50*'--')
+    print(25 * '--', f"{new_offers} new offers successfully committed!", 25 * '--', sep='\n')
+
 
 def clear_tables(session):
     """
@@ -106,7 +107,6 @@ def clear_tables(session):
 
 
 def update_local_database(store, offers_list, session):
-
     update_products(session, offers_list)
 
     if store == 'rewe':
@@ -127,7 +127,3 @@ def update_remote_database(store, offers_list, session, iter_number):
     else:
         store_id = 2
     update_offers(session, store_id, offers_list)
-
-
-if __name__ == '__main__':
-    print(os.getenv("DATABASE_URL"))
