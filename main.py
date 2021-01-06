@@ -3,6 +3,22 @@ from scraper import get_html, scrape_info
 import schedule
 import time
 from datetime import datetime
+import logging
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+formatter = logging.Formatter('%(asctime)s:%(name)s:%(message)s')
+
+file_handler = logging.FileHandler('main.log')
+file_handler.setLevel(logging.INFO)
+file_handler.setFormatter(formatter)
+
+# stream_handler = logging.StreamHandler()
+# stream_handler.setFormatter(formatter)
+
+logger.addHandler(file_handler)
+# logger.addHandler(stream_handler)
 
 
 def scrape_and_update():
@@ -23,10 +39,19 @@ def scrape_and_update():
             source = get_html(url, headers)
             # Parse the HTML data into a HTML Class from the requests_html module
             offers_list.extend(scrape_info(source, html_elements))
+        try:
+            db_connection.update_local_database(grocery_stores[i], offers_list, local_db_session)
+            logger.info(f'Successfully updated local database for store: {grocery_stores[i]}')
+        except:
+            logger.exception(f'Failed to update local database for the store: {grocery_stores[i]}')
 
-        db_connection.update_local_database(grocery_stores[i], offers_list, local_db_session)
         # Update Heroku's Postgres database
-        db_connection.update_remote_database(grocery_stores[i], offers_list, remote_db_session, i)
+        try:
+            db_connection.update_remote_database(grocery_stores[i], offers_list, remote_db_session, i)
+            logger.info(f'Successfully updated remote database for store: {grocery_stores[i]}')
+        except:
+            logger.exception(f'Failed to update local database for the store: {grocery_stores[i]}')
+
 
     print(f"\n*****Last Update: {datetime.now()}*****\n")
 
